@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "drawPath";
+    ViewBag.Title = "displayToUser";
 }
 
 <!DOCTYPE html>
@@ -54,7 +54,7 @@
             }
 
             function displayFileToView(interval) {
-                $.post("@Url.Action("DisplayFileToView")").done(function (xml) {
+                $.post("@Url.Action("displayToUser")").done(function (xml) {
                     var xmlDoc = $.parseXML(xml);
 
                     if ($xml.find("stop").text() == "no")

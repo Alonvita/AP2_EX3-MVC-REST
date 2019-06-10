@@ -1,31 +1,104 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "drawPath";
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="style" type="text/css" href="~/Styles.css">
+</head>
+<body>
+    <canvas id="displayCanvas"></canvas>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
+    <script>
+            var cnvs = document.getElementById("myCanvas");
+
+            cnvs.style.position = "absolute";
+
+            var ctx = cnvs.getContext("2d");
+            ctx.canvas.width = window.innerWidth;
+            ctx.canvas.height = window.innerHeight;
+
+
+            var latGlobal = 0;
+            var longGlobal = 0;
+            var prevLat = null;
+            var prevLong = null;
+            var takeOff = 0;
+
+            var DEFAULT_DRAWING_COLOR = "#FF0000";
+
+            function drawStartingPositionPoint(longNormalized, latTmpized)
+            {
+                // start a path
+                ctx.beginPath();
+
+                // create arc
+                ctx.arc(longNormalized, latTmpized, 10, 0, 2 * Math.PI);
+
+                // stroke
+                ctx.stroke();
+
+                // fill
+                ctx.fillStyle = DEFAULT_DRAWING_COLOR;
+                ctx.fill();
+            }
+
+            function drawRouteLine(prevLong, prevLat, longNormalized, latTmpized) {
+                ctx.beginPath();
+                ctx.fillStyle = DEFAULT_DRAWING_COLOR;
+                ctx.moveTo(prevLong, prevLat);
+                ctx.lineTo(longNormalized, latTmpized);
+                ctx.strokeStyle = DEFAULT_DRAWING_COLOR;
+                ctx.stroke();
+            }
+
+            function displayFileToView(interval) {
+                $.post("@Url.Action("DisplayFileToView")").done(function (xml) {
+                    var xmlDoc = $.parseXML(xml);
+
+                    if ($xml.find("stop").text() == "no")
+                        clearInterval(interval)
+
+                    $xml = $(xmlDoc);
+                    longGlobal = $xml.find("Long").text();
+                    latGlobal = $xml.find("Lat").text();
+
+                    var longTmp = (parseFloat(longLoaded) + 180) * (window.innerWidth / 360);
+                    var latTmp = (parseFloat(latLoaded) + 90) * (window.innerHeight / 180);
+
+                    if (takeOff == 0) {
+                        drawPoint(longTmp, latTmp);
+                        prevLong = longTmp;
+                        prevLat = latTmp;
+
+                        // took off -> set bool to true
+                        takeoff = 1;
+                    } else {
+                        drawLine(prevLong, prevLat, longTmp, latTmp);
+                        prevLong = longTmp;
+                        prevLat = latTmp;
+
+                    }
+                });
+
+            }
+
+            function draw() {
+                // Local Variables
+                var IntervalTime = @Session["time"] * 1000;
+                var interval = setInterval(myTimer, IntervalTime);
+
+                timoutVar = setTimeout(function () {
+                    clearInterval(interval)
+                }, @Session["timeout"]* 1000);
+
+                // save
+                displayFileToView(interval);
+            }
+
+            draw();
+    </script>
+    </>
+</body>
+</html>

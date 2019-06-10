@@ -2,86 +2,100 @@
     ViewBag.Title = "displayPanel";
 }
 
-<html>
-<body background="~/Resources/export-map-share.png" style="background-repeat:no-repeat; background-size:cover; padding:0; margin:0" id="bgImg">
-    <canvas id="myCanvas" style="border:0.5px solid black"></></canvas>
-</body>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="style" type="text/css" href="~/Styles.css">
+</head>
+    <body>
+        <canvas id="displayCanvas"></canvas>
+
+
+            <script>
+                var cnvs = document.getElementById("myCanvas");
+
+                cnvs.style.position = "absolute";
+
+                var ctx = cnvs.getContext("2d");
+                ctx.canvas.width = window.innerWidth;
+                ctx.canvas.height = window.innerHeight;
+
+
+                var latGlobal = 0;
+                var longGlobal = 0;
+                var prevLat = null;
+                var prevLong = null;
+                var takeOff = 0;
+
+                var DEFAULT_DRAWING_COLOR = "#FF0000";
+
+                function drawStartingPositionPoint(longNormalized, latTmpized)
+                {
+                    // start a path
+                    ctx.beginPath();
+
+                    // create arc
+                    ctx.arc(longNormalized, latTmpized, 10, 0, 2 * Math.PI);
+
+                    // stroke
+                    ctx.stroke();
+
+                    // fill
+                    ctx.fillStyle = DEFAULT_DRAWING_COLOR;
+                    ctx.fill();
+                }
+
+                function drawRouteLine(prevLong, prevLat, longNormalized, latTmpized) {
+                    ctx.beginPath();
+                    ctx.fillStyle = DEFAULT_DRAWING_COLOR;
+                    ctx.moveTo(prevLong, prevLat);
+                    ctx.lineTo(longNormalized, latTmpized);
+                    ctx.strokeStyle = DEFAULT_DRAWING_COLOR;
+                    ctx.stroke();
+                }
+
+                function getLongLat() {
+                    $.post("@Url.Action("GetLongLat")").done(function (xml) {
+                        var xmlDoc = $.parseXML(xml);
+
+                        $xml = $(xmlDoc);
+                        longGlobal = $xml.find("Long").text();
+                        latGlobal = $xml.find("Lat").text();
+
+                        var longTmp = (parseFloat(longLoaded) + 180) * (window.innerWidth / 360);
+                        var latTmp = (parseFloat(latLoaded) + 90) * (window.innerHeight / 180);
+
+                        if (takeOff == 0) {
+                            drawPoint(longTmp, latTmp);
+                            prevLong = longTmp;
+                            prevLat = latTmp;
+
+                            // took off -> set bool to true
+                            takeoff = 1;
+                        } else {
+                            drawLine(prevLong, prevLat, longTmp, latTmp);
+                            prevLong = longTmp;
+                            prevLat = latTmp;
+
+                        }
+                    });
+
+                }
+
+                function draw() {
+                    // Local Variables
+                    var time = @Session["time"] * 1000;
+
+                    if (IntervalTime != 0) {
+                        setInterval(myTimer, IntervalTime);
+                    }
+
+                    // save
+                    getLongLat();
+                }
+
+                draw();
+            </script>
+        </>
+    </body>
 </html>
-
-<script>
-    var cnvs = document.getElementById("displayCanvas");
-
-    cnvs.style.position = "absolute";
-    cnvs.setAttribute('width', img.clientWidth);
-    cnvs.setAttribute('height', window.innerHeight - 26);
-
-    var ctx = cnvs.getContext("2d");
-
-    var latGlobal = 0;
-    var longGlobal = 0;
-    var prevLat = null;
-    var prevLong = null;
-    var takeOff = 0;
-
-    var DEFAULT_DRAWING_COLOR = "#FF0000";
-
-    function drawStartingPositionPoint(longNormalized, latTmpized)
-    {
-        ctx.beginPath();
-        ctx.arc(longNormalized, latTmpized, 10, 0, 2 * Math.PI);
-        ctx.stroke();
-        ctx.fillStyle = DEFAULT_DRAWING_COLOR;
-        ctx.fill();
-    }
-
-    function drawRouteLine(prevLong, prevLat, longNormalized, latTmpized) {
-        ctx.beginPath();
-        ctx.fillStyle = DEFAULT_DRAWING_COLOR;
-        ctx.moveTo(prevLong, prevLat);
-        ctx.lineTo(longNormalized, latTmpized);
-        ctx.strokeStyle = DEFAULT_DRAWING_COLOR;
-        ctx.stroke();
-    }
-
-    function getLongLat() {
-        $.post("@Url.Action("GetLongLat")").done(function (xml) {
-            var xmlDoc = $.parseXML(xml);
-
-            $xml = $(xmlDoc);
-            longGlobal = $xml.find("Long").text();
-            latGlobal = $xml.find("Lat").text();
-
-            var longTmp = (parseFloat(longLoaded) + 180) * (window.innerWidth / 360);
-            var latTmp = (parseFloat(latLoaded) + 90) * (window.innerHeight / 180);
-
-            if (takeOff == 0) {
-                drawPoint(longTmp, latTmp);
-                prevLong = longTmp;
-                prevLat = latTmp;
-
-                // took off -> set bool to true
-                takeoff = 1;
-            } else {
-                drawLine(prevLong, prevLat, longTmp, latTmp);
-                prevLong = longTmp;
-                prevLat = latTmp;
-
-            }
-        });
-
-    }
-
-    function draw() {
-        // Local Variables
-        var time = @Session["time"] * 1000;
-
-        if (IntervalTime != 0) {
-            setInterval(myTimer, IntervalTime);
-        }
-
-        // save
-        getLongLat();
-    }
-
-    draw();
-</script>

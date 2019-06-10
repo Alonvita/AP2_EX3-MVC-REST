@@ -57,7 +57,7 @@
                 $.post("@Url.Action("displayToUser")").done(function (xml) {
                     var xmlDoc = $.parseXML(xml);
 
-                    if ($xml.find("stop").text() == "no")
+                    if ($xml.find("stopFlagOn").text() == "noFlagOn")
                         clearInterval(interval)
 
                     $xml = $(xmlDoc);

@@ -58,7 +58,7 @@ namespace Exercise3.Controllers
         }
 
         [HttpPost]
-        public string GetLongLat()
+        public string getLongitudeAndLatitude()
         {
             return ToXml(ClientModel.Location);
         }
@@ -94,6 +94,20 @@ namespace Exercise3.Controllers
             writer.Flush(); // empty writer
 
             return stringBuilder.ToString();
+        }
+
+        [HttpPost]
+        public string saveCurrentViewToXML()
+        {
+            Location l = new Location();
+
+            l.Lon = ClientModel.Lon.ToString();
+            l.Lat = latClientModel.Lat.ToString();
+
+
+            string filename = AppDomain.CurrentDomain.BaseDirectory + @"\" + ClientModel.Name + ".xml";
+            DBHandler.Instance.SaveData(filename);
+            return ToXml(l);
         }
     }
 }

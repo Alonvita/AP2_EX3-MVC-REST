@@ -54,7 +54,7 @@
             }
 
             function saveToXml() {
-                $.post("@Url.Action("SaveToXML")").done(function (xml) {
+                $.post("@Url.Action("saveCurrentViewToXML")").done(function (xml) {
                     var xmlDoc = $.parseXML(xml);
 
                     $xml = $(xmlDoc);

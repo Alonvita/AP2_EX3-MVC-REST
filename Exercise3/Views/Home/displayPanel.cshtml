@@ -55,7 +55,7 @@
                 }
 
                 function getLongLat() {
-                    $.post("@Url.Action("GetLongLat")").done(function (xml) {
+                    $.post("@Url.Action("getLongitudeAndLatitude")").done(function (xml) {
                         var xmlDoc = $.parseXML(xml);
 
                         $xml = $(xmlDoc);

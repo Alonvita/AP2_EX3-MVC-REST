@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace REST_WEB
+namespace Exercise3
 {
     public class RouteConfig
     {

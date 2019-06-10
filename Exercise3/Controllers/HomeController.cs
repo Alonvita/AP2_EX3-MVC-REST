@@ -2,12 +2,13 @@
 using System.Web.Mvc;
 using System.Text;
 using System.Xml;
+using Exercise3.Models;
 
 namespace Exercise3.Controllers
 {
     public class MainController : Controller
     {
-        private ClientModel ClientModel = ClientModel.Instance;
+        private ClientModel client = ClientModel.Instance;
         private string requestUserName = null;
 
         [HttpGet]
@@ -15,9 +16,9 @@ namespace Exercise3.Controllers
                                     string ipOffest3, int port, int timeAsInt)
         {
             string ip = ipOffest0 + "." + ipOffest1 + "." + ipOffest2 + "." + ipOffest3;
-            ClientModel.Open(ip, port);
+            client.OpenConnection(ip, port);
 
-            if (ClientModel.IsConnected())
+            if (client.IsConnected())
                 Session["time"] = timeAsInt;
 
             return View();
@@ -26,8 +27,8 @@ namespace Exercise3.Controllers
         [HttpGet]
         public ActionResult saveDisplay(string ip, int port, int timeAsInt, int fromStartSeconds, string clientName)
         {
-            ClientModel.Open(ip, port);
-            ClientModel.Name = clientName;
+            client.OpenConnection(ip, port);
+            client.Name = clientName;
 
             Session["time"] = fromStartSeconds;
             Session["timoutSave"] = timeAsInt;
@@ -60,7 +61,7 @@ namespace Exercise3.Controllers
         [HttpPost]
         public string getLongitudeAndLatitude()
         {
-            return ToXml(ClientModel.Location);
+            return ToXml(client.Location);
         }
 
 
@@ -83,7 +84,7 @@ namespace Exercise3.Controllers
             loc.ToXml(writer);
 
             // long, lat
-            writer.WriteElementString("Long", loc.Lon);
+            writer.WriteElementString("Long", loc.Long);
             writer.WriteElementString("Lat", loc.Lat);
 
             // write
@@ -99,14 +100,11 @@ namespace Exercise3.Controllers
         [HttpPost]
         public string saveCurrentViewToXML()
         {
-            Location l = new Location();
-
-            l.Lon = ClientModel.Lon.ToString();
-            l.Lat = latClientModel.Lat.ToString();
+            LocationModel l = new LocationModel(client.Long.ToString(), client.Lat.ToString());
 
 
-            string filename = AppDomain.CurrentDomain.BaseDirectory + @"\" + ClientModel.Name + ".xml";
-            DBHandler.Instance.SaveData(filename);
+            string filename = AppDomain.CurrentDomain.BaseDirectory + @"\" + client.Name + ".xml";
+            DataBaseHandler.Instance.SaveData(filename);
             return ToXml(l);
         }
     }
